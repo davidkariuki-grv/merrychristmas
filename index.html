@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merry Christmas</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-image: url('https://images.pexels.com/photos/764310/pexels-photo-764310.jpeg');
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+        color: white;
+    }
+
+    h1 {
+        margin-top: 70px;
+        font-size: 3em;
+        color: #ff4500;
+    }
+
+    p {
+        font-size: 1.3em;
+    }
+
+    .controls {
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 15px;
+        background: #ff4500;
+        color: white;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    button:hover {
+        background: #ff6347;
+        transform: scale(1.05);
+    }
+
+    input[type="range"] {
+        width: 200px;
+    }
+
+    /* Snow */
+    .snowflake {
+        position: fixed;
+        top: -10px;
+        color: white;
+        user-select: none;
+        animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+        to { transform: translateY(110vh); }
+    }
+
+    /* Santa */
+    .santa {
+        position: fixed;
+        top: 60px;
+        left: -200px;
+        font-size: 80px;
+        animation: fly 15s linear infinite;
+    }
+
+    @keyframes fly {
+        to { transform: translateX(120vw); }
+    }
+
+    /* Modal */
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #ffffff;
+        color: #333;
+        padding: 25px;
+        border-radius: 10px;
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+        from { transform: scale(0.7); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Tooltip */
+    .tooltip {
+        position: relative;
+    }
+
+    .tooltip::after {
+        content: attr(data-tip);
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: black;
+        color: white;
+        padding: 5px 8px;
+        border-radius: 5px;
+        font-size: 0.8em;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover::after {
+        opacity: 1;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="santa">🎅</div>
+
+<audio id="bgMusic" loop></audio>
+
+<h1>Merry Christmas! 🎄</h1>
+<p>Wishing you peace, love, and joy this holiday season.</p>
+
+<div id="welcomeModal" class="modal">
+    <div class="modal-content">
+        <h2>🎄 Welcome & Happy Holidays!</h2>
+        <p>
+            Enjoy festive music, falling snow, and a little Christmas magic.
+            <br><br>
+            👉 Click <strong>Play Music</strong> to begin  
+            <br>
+            🎶 Use Next / Previous to change songs
+        </p>
+        <button onclick="closeModal()">Start the Experience ✨</button>
+    </div>
+</div>
+
+<div class="controls">
+    <label id="musicLabel">No music playing</label><br><br>
+
+    <button class="tooltip" data-tip="Previous song" onclick="prevSong()">⏮ Prev</button>
+    <button class="tooltip" data-tip="Play/Pause music" onclick="startMusic()" id="play">▶ Play</button>
+    <button class="tooltip" data-tip="Next song" onclick="nextSong()">⏭ Next</button><br><br>
+
+    <label>Volume</label><br>
+    <input type="range" min="0" max="1" step="0.01" value="0.5" id="volumeSlider">
+</div>
+
+<script>
+// Audio setup
+const music = document.getElementById("bgMusic");
+const slider = document.getElementById("volumeSlider");
+
+// Replace these with your Google Drive file IDs
+const playlist = [
+    "pentatonix.mp3", // Pentatonix Christmas
+    "merry.mp3", // Merry Christmas
+    "littleDrummer.mp3"  // Little Drummer Boy
+];
+
+let currentSong = 0;
+let started = false;
+
+function loadSong(index) {
+    music.src = playlist[index];
+    music.load();
+}
+
+function startMusic() {
+    if (!started) {
+        started = true;
+        loadSong(currentSong);
+        fadeIn();
+        document.getElementById("musicLabel").innerText = "Playing: " + playlist[currentSong];
+        document.getElementById("play").innerText = "⏸ Pause";
+    } else if (!music.paused) {
+        music.pause();
+        document.getElementById("play").innerText = "▶ Play";   
+    } else {
+        music.play();
+        document.getElementById("play").innerText = "⏸ Pause";
+    }
+}
+
+function fadeIn() {
+    music.volume = 0;
+    music.play();
+    let vol = 0;
+    const fade = setInterval(() => {
+        if (vol < slider.value) {
+            vol += 0.01;
+            music.volume = vol;
+        } else {
+            clearInterval(fade);
+        }
+    }, 200);
+}
+
+function nextSong() {
+    currentSong = (currentSong + 1) % playlist.length;
+    loadSong(currentSong);
+    document.getElementById("musicLabel").innerText = "Playing: " + playlist[currentSong];
+    music.play();
+}
+
+function prevSong() {
+    currentSong = (currentSong - 1 + playlist.length) % playlist.length;
+    loadSong(currentSong);
+    document.getElementById("musicLabel").innerText = "Playing: " + playlist[currentSong];
+    music.play();
+}
+
+slider.addEventListener("input", () => {
+    music.volume = slider.value;
+});
+
+// Auto next song
+music.addEventListener("ended", nextSong);
+
+// Snow generator
+function snow() {
+    const flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.innerHTML = "❄";
+    flake.style.left = Math.random() * window.innerWidth + "px";
+    flake.style.fontSize = Math.random() * 20 + 10 + "px";
+    flake.style.animationDuration = Math.random() * 5 + 5 + "s";
+    document.body.appendChild(flake);
+
+    setTimeout(() => flake.remove(), 10000);
+}
+
+setInterval(snow, 300);
+
+// Welcome modal
+function closeModal() {
+    document.getElementById("welcomeModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>
